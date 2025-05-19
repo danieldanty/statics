@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Statistik</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    header {
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 20px 0;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    
+    .content-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .calculator-section {
+        flex: 1;
+        min-width: 300px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .chart-section {
+        flex: 2;
+        min-width: 500px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
+    
+    .btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .btn.active {
+        background-color: #2c3e50;
+    }
+    
+    .input-group {
+        margin-bottom: 15px;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    input, textarea, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .calculate-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+    
+    .calculate-btn:hover {
+        background-color: #27ae60;
+    }
+    
+    .results {
+        margin-top: 20px;
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+    }
+    
+    .result-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed #eee;
+    }
+    
+    .result-label {
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .chart-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .chart-btn {
+        padding: 8px 15px;
+        background-color: #9b59b6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .chart-btn:hover {
+        background-color: #8e44ad;
+    }
+    
+    .chart-btn.active {
+        background-color: #5c0f8b;
+    }
+    
+    .chart-container {
+        height: 400px;
+        position: relative;
+    }
+    
+    @media (max-width: 768px) {
+        .content-wrapper {
+            flex-direction: column;
+        }
+        
+        .calculator-section, .chart-section {
+            width: 100%;
+        }
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    footer {
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #2c3e50;
+        color: #fff;
+    }
+</style>
+<body>
+    <header>
+        <div class="container">
+            <h1>Statistical Calculator with Charts</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="btn-group">
+            <button class="btn active" data-tab="basic-stats">Basic Statistics</button>
+            <button class="btn" data-tab="probability">probability</button>
+            <button class="btn" data-tab="inference">Statistical Inference</button>
+            <button class="btn" data-tab="regression">Regression & Correlation</button>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="calculator-section">
+                <!-- Tab Statistik Dasar -->
+                <div id="basic-stats" class="tab-content active">
+                    <h2>Basic statistics</h2>
+                    <div class="input-group">
+                        <label for="data-input">Enter Data (separate with commas):</label>
+                        <textarea id="data-input" placeholder="Example: 12, 15, 18, 22, 30, 35, 42"></textarea>
+                    </div>
+                    <button id="calculate-basic" class="calculate-btn">Count</button>
+                    
+                    <div id="basic-results" class="results">
+                        <h3>Calculation result:</h3>
+                        <div class="result-item">
+                            <span class="result-label">Mean:</span>
+                            <span id="mean-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Median:</span>
+                            <span id="median-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Modus:</span>
+                            <span id="mode-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Range:</span>
+                            <span id="range-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Variance:</span>
+                            <span id="variance-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Standard Deviation:</span>
+                            <span id="std-dev-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Q1 (First Quartile):</span>
+                            <span id="q1-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Q3 (Third Quartile):</span>
+                            <span id="q3-result">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">IQR (Inter-Quartile Range):</span>
+                            <span id="iqr-result">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Probabilitas -->
+                <div id="probability" class="tab-content">
+                    <h2>Probabilitas</h2>
+                    <div class="input-group">
+                        <label for="prob-distribution">Select Distribution:</label>
+                        <select id="prob-distribution">
+                            <option value="binomial">Distribusi Binomial</option>
+                            <option value="poisson">Distribusi Poisson</option>
+                            <option value="normal">Distribusi Normal</option>
+                        </select>
+                    </div>
+                    
+                  <!-- Binomial Distribution Inputs -->
+<div id="binomial-inputs">
+    <div class="input-group">
+        <label for="binomial-n">Number of trials (n):</label>
+        <input type="number" id="binomial-n" placeholder="Example: 10" min="1">
+    </div>
+    <div class="input-group">
+        <label for="binomial-p">Probability of success (p):</label>
+        <input type="number" id="binomial-p" placeholder="Example: 0.5" min="0" max="1" step="0.01">
+    </div>
+    <div class="input-group">
+        <label for="binomial-x">Number of successes (x):</label>
+        <input type="number" id="binomial-x" placeholder="Example: 5" min="0">
+    </div>
+</div>
+
+<!-- Poisson Distribution Inputs -->
+<div id="poisson-inputs" style="display:none;">
+    <div class="input-group">
+        <label for="poisson-lambda">Average (λ):</label>
+        <input type="number" id="poisson-lambda" placeholder="Example: 3" min="0" step="0.1">
+    </div>
+    <div class="input-group">
+        <label for="poisson-k">Number of occurrences (k):</label>
+        <input type="number" id="poisson-k" placeholder="Example: 2" min="0">
+    </div>
+</div>
+
+<!-- Normal Distribution Inputs -->
+<div id="normal-inputs" style="display:none;">
+    <div class="input-group">
+        <label for="normal-mean">Mean (μ):</label>
+        <input type="number" id="normal-mean" placeholder="Example: 0" step="any">
+    </div>
+    <div class="input-group">
+        <label for="normal-stddev">Standard Deviation (σ):</label>
+        <input type="number" id="normal-stddev" placeholder="Example: 1" min="0" step="any">
+    </div>
+    <div class="input-group">
+        <label for="normal-x">X Value:</label>
+        <input type="number" id="normal-x" placeholder="Example: 1.96" step="any">
+    </div>
+</div>
+
+<button id="calculate-probability" class="calculate-btn">Calculate</button>
+
+<div id="probability-results" class="results">
+    <h3>Calculation Results:</h3>
+    <div class="result-item">
+        <span class="result-label">P(X = x) / PDF:</span>
+        <span id="pmf-result">-</span>
+    </div>
+    <div class="result-item">
+        <span class="result-label">P(X ≤ x) / CDF:</span>
+        <span id="cdf-result">-</span>
+    </div>
+</div>
+</div>
+
+<!-- Statistical Inference Tab -->
+<div id="inference" class="tab-content">
+    <h2>Statistical Inference</h2>
+    <div class="input-group">
+        <label for="inference-type">Select Test Type:</label>
+        <select id="inference-type">
+            <option value="z-test">Z Test (1 sample)</option>
+            <option value="t-test">T Test (1 sample)</option>
+            <option value="t-test-paired">Paired T Test</option>
+            <option value="t-test-independent">Independent T Test</option>
+        </select>
+    </div>
+    
+    <!-- Z Test Inputs -->
+    <div id="z-test-inputs">
+        <div class="input-group">
+            <label for="z-sample-mean">Sample Mean:</label>
+            <input type="number" id="z-sample-mean" step="any">
+        </div>
+        <div class="input-group">
+            <label for="z-pop-mean">Population Mean (H₀):</label>
+            <input type="number" id="z-pop-mean" step="any">
+        </div>
+        <div class="input-group">
+            <label for="z-pop-stddev">Population Standard Deviation:</label>
+            <input type="number" id="z-pop-stddev" min="0" step="any">
+        </div>
+        <div class="input-group">
+            <label for="z-sample-size">Sample Size:</label>
+            <input type="number" id="z-sample-size" min="1">
+        </div>
+        <div class="input-group">
+            <label for="z-alpha">Significance Level (α):</label>
+            <select id="z-alpha">
+                <option value="0.01">0.01 (99%)</option>
+                <option value="0.05" selected>0.05 (95%)</option>
+                <option value="0.1">0.1 (90%)</option>
+            </select>
+       </div>
+    </div>
+    
+    <!-- Inputs for other tests can be added here -->
+    
+    <button id="calculate-inference" class="calculate-btn">Calculate</button>
+    
+    <div id="inference-results" class="results">
+        <h3>Test Results:</h3>
+        <div class="result-item">
+            <span class="result-label">Test Statistic:</span>
+            <span id="test-statistic-result">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">P-value:</span>
+            <span id="p-value-result">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Critical Value:</span>
+            <span id="critical-value-result">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Decision:</span>
+            <span id="decision-result">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Confidence Interval:</span>
+            <span id="ci-result">-</span>
+        </div>
+    </div>
+</div>
+
+<!-- Regression & Correlation Tab -->
+<div id="regression" class="tab-content">
+    <h2>Regression & Correlation</h2>
+    <div class="input-group">
+        <label for="x-data">X Values (separate with commas):</label>
+        <textarea id="x-data" placeholder="Example: 1, 2, 3, 4, 5"></textarea>
+    </div>
+    <div class="input-group">
+        <label for="y-data">Y Values (separate with commas):</label>
+        <textarea id="y-data" placeholder="Example: 2, 3.5, 5, 6.2, 7.8"></textarea>
+    </div>
+    
+    <button id="calculate-regression" class="calculate-btn">Calculate</button>
+    
+    <div id="regression-results" class="results">
+        <h3>Calculation Results:</h3>
+        <div class="result-item">
+            <span class="result-label">Regression Equation:</span>
+            <span id="regression-equation">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Correlation Coefficient (r):</span>
+            <span id="correlation-coef">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Coefficient of Determination (r²):</span>
+            <span id="determination-coef">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Standard Error:</span>
+            <span id="std-error">-</span>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="chart-section">
+    <h2>Data Visualization</h2>
+    <div class="chart-controls">
+        <button class="chart-btn active" data-chart="bar">Bar Chart</button>
+        <button class="chart-btn" data-chart="line">Line Chart</button>
+        <button class="chart-btn" data-chart="pie">Pie Chart</button>
+        <button class="chart-btn" data-chart="scatter">Scatter Plot</button>
+    </div>
+    <div class="chart-container">
+        <canvas id="data-chart"></canvas>
+    </div>
+</div>
+</div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2025 Statistics Calculator | Created to help with statistical calculations and data visualization</p>
+        <p>&copy; Made by Angel, Qwyn, And Daniel</p>
+    </div>
+</footer>
+<script>
+    // Function to handle tab switching
+document.addEventListener('DOMContentLoaded', function() {
+// Event listener for tab navigation
+const tabButtons = document.querySelectorAll('.btn[data-tab]');
+tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        // Remove active class from all buttons and tab content
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        
+        // Add active class to clicked button and corresponding tab content
+        this.classList.add('active');
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+    });
+});
+
+// Handle probability distribution type change
+const probDistribution = document.getElementById('prob-distribution');
+probDistribution.addEventListener('change', function() {
+    // Hide all distribution inputs
+    document.getElementById('binomial-inputs').style.display = 'none';
+    document.getElementById('poisson-inputs').style.display = 'none';
+    document.getElementById('normal-inputs').style.display = 'none';
+    
+    // Display inputs according to the selected distribution
+    document.getElementById(`${this.value}-inputs`).style.display = 'block';
+});
+
+// Event listener for charts
+const chartButtons = document.querySelectorAll('.chart-btn');
+chartButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        chartButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update chart type
+        if (currentData && currentData.length > 0) {
+            updateChart(this.getAttribute('data-chart'));
+        }
+    });
+});
+
+// Event listeners for calculate buttons
+document.getElementById('calculate-basic').addEventListener('click', calculateBasicStats);
+document.getElementById('calculate-probability').addEventListener('click', calculateProbability);
+document.getElementById('calculate-inference').addEventListener('click', calculateInference);
+document.getElementById('calculate-regression').addEventListener('click', calculateRegression);
+});
+
+// Global variables to store data and chart
+let currentData = [];
+let dataChart = null;
+
+// ----------------- BASIC STATISTICS -----------------
+
+function calculateBasicStats() {
+// Get input values and convert to number array
+const dataInput = document.getElementById('data-input').value;
+currentData = parseData(dataInput);
+
+if (currentData.length === 0) {
+    alert('Please enter valid data.');
+    return;
+}
+
+// Calculate basic statistics
+const mean = calculateMean(currentData);
+const median = calculateMedian(currentData);
+const mode = calculateMode(currentData);
+const range = calculateRange(currentData);
+const variance = calculateVariance(currentData);
+const stdDev = Math.sqrt(variance);
+const q1 = calculateQuantile(currentData, 0.25);
+const q3 = calculateQuantile(currentData, 0.75);
+const iqr = q3 - q1;
+
+// Display results
+document.getElementById('mean-result').textContent = mean.toFixed(2);
+document.getElementById('median-result').textContent = median.toFixed(2);
+document.getElementById('mode-result').textContent = mode.join(', ');
+document.getElementById('range-result').textContent = range.toFixed(2);
+document.getElementById('variance-result').textContent = variance.toFixed(2);
+document.getElementById('std-dev-result').textContent = stdDev.toFixed(2);
+document.getElementById('q1-result').textContent = q1.toFixed(2);
+document.getElementById('q3-result').textContent = q3.toFixed(2);
+document.getElementById('iqr-result').textContent = iqr.toFixed(2);
+
+// Update chart
+const activeChartType = document.querySelector('.chart-btn.active').getAttribute('data-chart');
+updateChart(activeChartType);
+}
+
+// Helper function for parsing data
+function parseData(input) {
+return input.split(',')
+    .map(item => item.trim())
+    .filter(item => item !== '')
+    .map(item => {
+        const num = parseFloat(item);
+        return isNaN(num) ? null : num;
+    })
+    .filter(item => item !== null);
+}
+
+// Function to calculate mean
+function calculateMean(data) {
+if (data.length === 0) return 0;
+const sum = data.reduce((acc, val) => acc + val, 0);
+return sum / data.length;
+}
+
+// Function to calculate median
+function calculateMedian(data) {
+if (data.length === 0) return 0;
+
+// Sort data
+const sortedData = [...data].sort((a, b) => a - b);
+
+const mid = Math.floor(sortedData.length / 2);
+
+return sortedData.length % 2 === 0
+    ? (sortedData[mid - 1] + sortedData[mid]) / 2
+    : sortedData[mid];
+}
+
+// Function to calculate mode
+function calculateMode(data) {
+if (data.length === 0) return [];
+
+// Count frequency for each value
+const frequency = {};
+data.forEach(val => {
+    frequency[val] = (frequency[val] || 0) + 1;
+});
+
+// Find maximum frequency
+let maxFreq = 0;
+for (const key in frequency) {
+    if (frequency[key] > maxFreq) {
+        maxFreq = frequency[key];
+    }
+}
+
+// Find all values with maximum frequency
+const modes = [];
+for (const key in frequency) {
+    if (frequency[key] === maxFreq) {
+        modes.push(parseFloat(key));
+    }
+}
+
+return modes;
+}
+
+// Function to calculate range
+function calculateRange(data) {
+if (data.length === 0) return 0;
+const min = Math.min(...data);
+const max = Math.max(...data);
+return max - min;
+}
+
+// Function to calculate variance
+function calculateVariance(data) {
+if (data.length <= 1) return 0;
+
+const mean = calculateMean(data);
+const squaredDiffs = data.map(val => Math.pow(val - mean, 2));
+const sum = squaredDiffs.reduce((acc, val) => acc + val, 0);
+
+// Sample variance (n-1)
+return sum / (data.length - 1);
+}
+
+// Function to calculate quantile
+function calculateQuantile(data, q) {
+if (data.length === 0) return 0;
+
+// Sort data
+const sortedData = [...data].sort((a, b) => a - b);
+
+const pos = (sortedData.length - 1) * q;
+const base = Math.floor(pos);
+const rest = pos - base;
+
+if (sortedData[base + 1] !== undefined) {
+    return sortedData[base] + rest * (sortedData[base + 1] - sortedData[base]);
+} else {
+    return sortedData[base];
+}
+}
+
+// ----------------- PROBABILITY -----------------
+
+function calculateProbability() {
+const distribution = document.getElementById('prob-distribution').value;
+let pmf = 0;
+let cdf = 0;
+
+if (distribution === 'binomial') {
+    const n = parseInt(document.getElementById('binomial-n').value);
+    const p = parseFloat(document.getElementById('binomial-p').value);
+    const x = parseInt(document.getElementById('binomial-x').value);
+    
+    if (isNaN(n) || isNaN(p) || isNaN(x) || n < 0 || p < 0 || p > 1 || x < 0 || x > n) {
+        alert('Please enter valid values for binomial distribution.');
+        return;
+    }
+    
+    pmf = binomialPMF(n, p, x);
+    cdf = binomialCDF(n, p, x);
+} else if (distribution === 'poisson') {
+    const lambda = parseFloat(document.getElementById('poisson-lambda').value);
+    const k = parseInt(document.getElementById('poisson-k').value);
+    
+    if (isNaN(lambda) || isNaN(k) || lambda <= 0 || k < 0) {
+        alert('Please enter valid values for Poisson distribution.');
+        return;
+    }
+    
+    pmf = poissonPMF(lambda, k);
+    cdf = poissonCDF(lambda, k);
+} else if (distribution === 'normal') {
+    const mean = parseFloat(document.getElementById('normal-mean').value);
+    const stdDev = parseFloat(document.getElementById('normal-stddev').value);
+    const x = parseFloat(document.getElementById('normal-x').value);
+    
+    if (isNaN(mean) || isNaN(stdDev) || isNaN(x) || stdDev <= 0) {
+        alert('Please enter valid values for normal distribution.');
+        return;
+    }
+    
+    pmf = normalPDF(mean, stdDev, x);
+    cdf = normalCDF(mean, stdDev, x);
+}
+
+// Display results
+document.getElementById('pmf-result').textContent = pmf.toFixed(6);
+document.getElementById('cdf-result').textContent = cdf.toFixed(6);
+
+// Visualize distribution
+visualizeProbabilityDistribution(distribution);
+}
+
+// Function to calculate combination nCr
+function combination(n, r) {
+    if (r > n) return 0;
+    if (r === 0 || r === n) return 1;
+    
+    let result = 1;
+    for (let i = 1; i <= r; i++) {
+        result *= (n - (r - i));
+        result /= i;
+    }
+    return result;
+}
+
+// Function to calculate PMF of binomial distribution
+function binomialPMF(n, p, x) {
+    return combination(n, x) * Math.pow(p, x) * Math.pow(1 - p, n - x);
+}
+
+// Function to calculate CDF of binomial distribution
+function binomialCDF(n, p, x) {
+    let cdf = 0;
+    for (let i = 0; i <= x; i++) {
+        cdf += binomialPMF(n, p, i);
+    }
+    return cdf;
+}
+
+// Function to calculate PMF of Poisson distribution
+function poissonPMF(lambda, k) {
+    return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+}
+
+// Function to calculate CDF of Poisson distribution
+function poissonCDF(lambda, k) {
+    let cdf = 0;
+    for (let i = 0; i <= k; i++) {
+        cdf += poissonPMF(lambda, i);
+    }
+    return cdf;
+}
+
+// Function to calculate factorial
+function factorial(n) {
+    if (n === 0 || n === 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= n; i++) {
+        result *= i;
+    }
+    return result;
+}
+
+// Function to calculate PDF of normal distribution
+function normalPDF(mean, stdDev, x) {
+    const exponent = -0.5 * Math.pow((x - mean) / stdDev, 2);
+    return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+}
+
+// Function to calculate CDF of normal distribution
+function normalCDF(mean, stdDev, x) {
+    // Approximation for normal distribution CDF
+    const z = (x - mean) / stdDev;
+    return 0.5 * (1 + erf(z / Math.sqrt(2)));
+}
+
+// Error function for normal CDF approximation
+function erf(x) {
+    // Constants
+    const a1 = 0.254829592;
+    const a2 = -0.284496736;
+    const a3 = 1.421413741;
+    const a4 = -1.453152027;
+    const a5 = 1.061405429;
+    const p = 0.3275911;
+    
+    // Save the sign of x
+    const sign = (x < 0) ? -1 : 1;
+    x = Math.abs(x);
+    
+    // Approximation formula
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    
+    return sign * y;
+}
+
+// Visualization of probability distributions
+function visualizeProbabilityDistribution(distribution) {
+    let labels = [];
+    let data = [];
+    
+    if (distribution === 'binomial') {
+        const n = parseInt(document.getElementById('binomial-n').value);
+        const p = parseFloat(document.getElementById('binomial-p').value);
+        
+        for (let i = 0; i <= n; i++) {
+            labels.push(i.toString());
+            data.push(binomialPMF(n, p, i));
+        }
+    } else if (distribution === 'poisson') {
+        const lambda = parseFloat(document.getElementById('poisson-lambda').value);
+        const maxK = Math.min(20, Math.ceil(lambda * 3)); // Limit for visualization
+        
+        for (let i = 0; i <= maxK; i++) {
+            labels.push(i.toString());
+            data.push(poissonPMF(lambda, i));
+        }
+    } else if (distribution === 'normal') {
+        const mean = parseFloat(document.getElementById('normal-mean').value);
+        const stdDev = parseFloat(document.getElementById('normal-stddev').value);
+        
+        // Create range of values from mean - 3*stdDev to mean + 3*stdDev
+        const min = mean - 3 * stdDev;
+        const max = mean + 3 * stdDev;
+        const step = (max - min) / 30;
+        
+        for (let x = min; x <= max; x += step) {
+            labels.push(x.toFixed(2));
+            data.push(normalPDF(mean, stdDev, x));
+        }
+    }
+    
+    // Create chart with line type
+    if (dataChart) {
+        dataChart.destroy();
+    }
+    
+    const ctx = document.getElementById('data-chart').getContext('2d');
+    dataChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `${distribution.charAt(0).toUpperCase() + distribution.slice(1)} Distribution`,
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Probability'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ----------------- STATISTICAL INFERENCE -----------------
+
+function calculateInference() {
+    const inferenceType = document.getElementById('inference-type').value;
+    
+    if (inferenceType === 'z-test') {
+        // Get input values
+        const sampleMean = parseFloat(document.getElementById('z-sample-mean').value);
+        const popMean = parseFloat(document.getElementById('z-pop-mean').value);
+        const popStdDev = parseFloat(document.getElementById('z-pop-stddev').value);
+        const sampleSize = parseInt(document.getElementById('z-sample-size').value);
+        const alpha = parseFloat(document.getElementById('z-alpha').value);
+        
+        if (isNaN(sampleMean) || isNaN(popMean) || isNaN(popStdDev) || isNaN(sampleSize) || popStdDev <= 0 || sampleSize <= 0) {
+            alert('Please enter valid values for Z test.');
+            return;
+        }
+        
+        // Calculate Z test statistic
+        const standardError = popStdDev / Math.sqrt(sampleSize);
+        const zScore = (sampleMean - popMean) / standardError;
+        
+        // Calculate p-value (two-tailed)
+        const pValue = 2 * (1 - normalCDF(0, 1, Math.abs(zScore)));
+        
+        // Calculate critical value
+        const criticalValue = zCritical(alpha / 2);
+        
+        // Make decision
+        const decision = Math.abs(zScore) > criticalValue 
+            ? 'Reject H₀' 
+            : 'Fail to reject H₀';
+        
+        // Calculate confidence interval
+        const margin = criticalValue * standardError;
+        const lowerCI = sampleMean - margin;
+        const upperCI = sampleMean + margin;
+        
+        // Display results
+        document.getElementById('test-statistic-result').textContent = zScore.toFixed(4);
+        document.getElementById('p-value-result').textContent = pValue.toFixed(4);
+        document.getElementById('critical-value-result').textContent = `±${criticalValue.toFixed(4)}`;
+        document.getElementById('decision-result').textContent = decision;
+        document.getElementById('ci-result').textContent = `${lowerCI.toFixed(4)} - ${upperCI.toFixed(4)} (${(1-alpha)*100}%)`;
+        
+        // Visualization
+        visualizeInferenceTest(zScore, criticalValue);
+    }
+    // Implementation for t-test and other tests can be added here
+}
+
+// Function to determine critical Z value
+function zCritical(alpha) {
+    // Critical value for standard normal distribution
+    // Approximation for inverse normal CDF
+    let low = -10;
+    let high = 10;
+    let mid;
+    
+    while (high - low > 1e-10) {
+        mid = (low + high) / 2;
+        if (normalCDF(0, 1, mid) > 1 - alpha) {
+            high = mid;
+        } else {
+            low = mid;
+        }
+    }
+    
+    return mid;
+}
+// Visualization of inference test results
+function visualizeInferenceTest(testStatistic, criticalValue) {
+    // Create range of values for standard normal distribution visualization
+    const min = -4;
+    const max = 4;
+    const step = 0.1;
+    
+    const labels = [];
+    const data = [];
+    
+    for (let x = min; x <= max; x += step) {
+        labels.push(x.toFixed(1));
+        data.push(normalPDF(0, 1, x));
+    }
+    
+    // Determine rejection area
+    const rejectionData = data.map((y, i) => {
+        const x = parseFloat(labels[i]);
+        return (Math.abs(x) > criticalValue) ? y : 0;
+    });
+    
+    // Create chart
+    if (dataChart) {
+        dataChart.destroy();
+    }
+    
+    const ctx = document.getElementById('data-chart').getContext('2d');
+    dataChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Standard Normal Distribution',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: true
+                },
+                {
+                    label: 'Rejection Area',
+                    data: rejectionData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Density'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Z Value'
+                    }
+                }
+            },
+            plugins: {
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            scaleID: 'x',
+                            value: testStatistic,
+                            borderColor: 'rgba(255, 0, 0, 1)',
+                            borderWidth: 2,
+                            label: {
+                                content: 'Test Statistic',
+                                enabled: true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ----------------- REGRESSION & CORRELATION -----------------
+
+function calculateRegression() {
+    // Take Data X and Y
+    const xDataInput = document.getElementById('x-data').value;
+    const yDataInput = document.getElementById('y-data').value;
+    
+    const xData = parseData(xDataInput);
+    const yData = parseData(yDataInput);
+    
+    if (xData.length === 0 || yData.length === 0 || xData.length !== yData.length) {
+        alert('Please enter valid X and Y data with the same amount.');
+        return;
+    }
+    
+    // Calculate linear regression
+    const n = xData.length;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumX2 = 0;
+    let sumY2 = 0;
+    
+    for (let i = 0; i < n; i++) {
+        sumX += xData[i];
+        sumY += yData[i];
+        sumXY += xData[i] * yData[i];
+        sumX2 += xData[i] * xData[i];
+        sumY2 += yData[i] * yData[i];
+    }
+    
+    const meanX = sumX / n;
+    const meanY = sumY / n;
+    
+    // Calculate regression coefficients
+    const numerator = sumXY - n * meanX * meanY;
+    const denominator = sumX2 - n * meanX * meanX;
+    
+    const slope = numerator / denominator;
+    const intercept = meanY - slope * meanX;
+    
+    // Calculate correlation coefficient
+    const numeratorR = n * sumXY - sumX * sumY;
+    const denominatorR = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+    const r = numeratorR / denominatorR;
+    
+    // Calculate coefficient of determination
+    const r2 = r * r;
+    
+    // Calculate standard error of regression
+    let sumSquaredError = 0;
+    for (let i = 0; i < n; i++) {
+        const predicted = intercept + slope * xData[i];
+        sumSquaredError += Math.pow(yData[i] - predicted, 2);
+    }
+    const standardError = Math.sqrt(sumSquaredError / (n - 2));
+    
+    // Display results
+    document.getElementById('regression-equation').textContent = `Y = ${intercept.toFixed(4)} + ${slope.toFixed(4)}X`;
+    document.getElementById('correlation-coef').textContent = r.toFixed(4);
+    document.getElementById('determination-coef').textContent = r2.toFixed(4);
+    document.getElementById('std-error').textContent = standardError.toFixed(4);
+    
+    // Visualize regression
+    visualizeRegression(xData, yData, intercept, slope);
+}
+
+// Regression visualization
+function visualizeRegression(xData, yData, intercept, slope) {
+    // Prepare data for scatter plot
+    const scatterData = [];
+    for (let i = 0; i < xData.length; i++) {
+        scatterData.push({ x: xData[i], y: yData[i] });
+    }
+    
+    // Prepare data for regression line
+    const minX = Math.min(...xData);
+    const maxX = Math.max(...xData);
+    const lineData = [
+        { x: minX, y: intercept + slope * minX },
+        { x: maxX, y: intercept + slope * maxX }
+    ];
+
+    // Create chart
+    if (dataChart) {
+        dataChart.destroy();
+    }
+    
+    const ctx = document.getElementById('data-chart').getContext('2d');
+    dataChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Data',
+                    data: scatterData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    pointRadius: 6
+                },
+                {
+                    label: 'Regression Line',
+                    data: lineData,
+                    type: 'line',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'X'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Y'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ----------------- CHART FUNCTIONS -----------------
+
+function updateChart(chartType) {
+    if (!currentData || currentData.length === 0) return;
+    
+    // Destroy existing chart if any
+    if (dataChart) {
+        dataChart.destroy();
+    }
+    
+    const ctx = document.getElementById('data-chart').getContext('2d');
+    
+    // Prepare data for chart
+    const labels = currentData.map((_, index) => `Data ${index + 1}`);
+    const colors = currentData.map(() => 
+        `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.7)`
+    );
+    
+}
+    if (chartType === 'bar') {
+        dataChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Data Value',
+                    data: currentData,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else if (chartType === 'line') {
+        dataChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Data Value',
+                    data: currentData,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else if (chartType === 'pie') {
+        dataChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: currentData,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    } else if (chartType === 'scatter') {
+        // For scatter plot, we need to create data with x and y
+        const scatterData = currentData.map((value, index) => {
+            return {
+                x: index,
+                y: value
+            };
+        });
+    }
+        dataChart = new Chart(ctx), {
+            data: {
+                datasets: [{
+                    label: 'Data Value',
+                    data: scatterData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    pointRadius: 6
+                }]
+        
+            },
+            options: {
+                responsive: true,
+                maintainAspect
+            }
+        }
+        // ----------------- CHART FUNCTIONS -----------------
+
+function updateChart(chartType) {
+    if (!currentData || currentData.length === 0) return;
+    
+    // Destroy existing chart if any
+    if (dataChart) {
+        dataChart.destroy();
+    }
+    
+    const ctx = document.getElementById('data-chart').getContext('2d');
+    
+    // Prepare data for chart
+    const labels = currentData.map((_, index) => `Data ${index + 1}`);
+    const colors = currentData.map(() => 
+        `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.7)`
+    );
+    
+    if (chartType === 'bar') {
+        dataChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Data Value',
+                    data: currentData,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else if (chartType === 'line') {
+        dataChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Data Value',
+                    data: currentData,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else if (chartType === 'pie') {
+        dataChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: currentData,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    } else if (chartType === 'scatter') {
+        // For scatter plot, we need to create data with x and y
+        const scatterData = currentData.map((value, index) => {
+            return {
+                x: index,
+                y: value
+            };
+        });
+        
+        dataChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Data Value',
+                    data: scatterData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Index'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else if (chartType === 'histogram') {
+        // Create histogram from data
+        const min = Math.min(...currentData);
+        const max = Math.max(...currentData);
+        const binCount = Math.ceil(Math.sqrt(currentData.length)); // Square root rule for bin count
+        const binWidth = (max - min) / binCount;
+        
+        // Initialize bins
+        const bins = Array(binCount).fill(0);
+        const binLabels = [];
+        
+        // Create label for each bin
+        for (let i = 0; i < binCount; i++) {
+            const binStart = min + i * binWidth;
+            const binEnd = binStart + binWidth;
+            binLabels.push(`${binStart.toFixed(2)}-${binEnd.toFixed(2)}`);
+        }
+        
+        // Calculate frequency for each bin
+        currentData.forEach(value => {
+            // Determine bin for value
+            const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
+            bins[binIndex]++;
+        });
+        
+        dataChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: binLabels,
+                datasets: [{
+                    label: 'Frequency',
+                    data: bins,
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Frequency'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Value Interval'
+                        }
+                    }
+                }
+            }
+        });
+    } else if (chartType === 'boxplot') {
+        // Boxplot implementation using Chart.js
+        // We need additional plugin for boxplot, but we can create a simple visualization ourselves
+        
+        // Sort data
+        const sortedData = [...currentData].sort((a, b) => a - b);
+        
+        // Calculate statistics for boxplot
+        const min = sortedData[0];
+        const max = sortedData[sortedData.length - 1];
+        const q1 = calculateQuantile(sortedData, 0.25);
+        const median = calculateQuantile(sortedData, 0.5);
+        const q3 = calculateQuantile(sortedData, 0.75);
+        
+        // Create dataset for simple boxplot visualization
+        dataChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Boxplot'],
+                datasets: [
+                    {
+                        label: 'Min to Q1',
+                        data: [q1 - min],
+                        backgroundColor: 'rgba(0, 0, 0, 0)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        barPercentage: 0.3,
+                        base: min
+                    },
+                    {
+                        label: 'Q1 to Median',
+                        data: [median - q1],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        barPercentage: 0.3,
+                        base: q1
+                    },
+                    {
+                        label: 'Median to Q3',
+                        data: [q3 - median],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        barPercentage: 0.3,
+                        base: median
+                    },
+                    {
+                        label: 'Q3 to Max',
+                        data: [max - q3],
+                        backgroundColor: 'rgba(0, 0, 0, 0)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        barPercentage: 0.3,
+                        base: q3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function() {
+                                return 'Boxplot Statistics';
+                            },
+                            label: function() {
+                                return [
+                                    `Min: ${min.toFixed(2)}`,
+                                    `Q1: ${q1.toFixed(2)}`,
+                                    `Median: ${median.toFixed(2)}`,
+                                    `Q3: ${q3.toFixed(2)}`,
+                                    `Max: ${max.toFixed(2)}`
+                                ];
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Display chart 
+    document.getElementById('chart-container').style.display = 'block';
+}
+               </script>
